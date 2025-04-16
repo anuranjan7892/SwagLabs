@@ -31,14 +31,16 @@ pipeline {
         }
         stage('Run smoke tests') {
             steps {
-                try {
-                    sh '''
-                        . venv/bin/activate
-                        pytest -m smoke --html=report.html --self-contained-html
-                    '''
-                } catch (err) {
-                    currentBuild.result = 'FAILURE'
-                    error("Smoke tests failed. Stopping CI CD pipeline: ${err}")
+                script {
+                    try {
+                        sh '''
+                            . venv/bin/activate
+                            pytest -m smoke --html=report.html --self-contained-html
+                        '''
+                    } catch (err) {
+                        currentBuild.result = 'FAILURE'
+                        error("Smoke tests failed. Stopping CI CD pipeline: ${err}")
+                    }
                 }
             }
         }
