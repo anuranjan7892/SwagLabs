@@ -31,15 +31,19 @@ pipeline {
         }
         stage('Run smoke tests') {
             steps {
-                sh '''
-                    . venv/bin/activate
-                    pytest -m smoke --html=report.html --self-contained-html
-                '''
+                try {
+                        sh '''
+                            . venv/bin/activate
+                            pytest -m smoke --html=report.html --self-contained-html
+                        '''
+                } catch (err) {
+                    currentBuild.result = 'FAILURE'
+                    error("Smoke tests failed. Stopping CI CD pipeline: ${err}")
+                }
             }
         }
         stage('Deploy to Production'){
             steps {
-                input message: 'Proceed to Production?'
                 sh 'chmod +x deploy/prod_deploy.sh'
                 sh './deploy/prod_deploy.sh'
             }
