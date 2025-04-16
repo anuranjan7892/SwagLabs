@@ -6,12 +6,6 @@ pipeline {
                 git 'https://github.com/anuranjan7892/SwagLabs.git'
             }
         }
-        stage('Deploy to Test'){
-            steps {
-                sh 'chmod +x deploy/test_deploy.sh'
-                sh './deploy/test_deploy.sh'
-            }
-        }
         stage('Environment setup') {
             steps {
                 sh '''
@@ -21,11 +15,25 @@ pipeline {
                 '''
             }
         }
+        stage('Dev code changes') {
+            steps {
+                sh '''
+                    . venv/bin/activate
+                    pytest -k test_add_new_change
+                '''
+            }
+        }
+        stage('Deploy to Test'){
+            steps {
+                sh 'chmod +x deploy/test_deploy.sh'
+                sh './deploy/test_deploy.sh'
+            }
+        }
         stage('Run smoke tests') {
             steps {
                 sh '''
                     . venv/bin/activate
-                    pytest -m smoke --html=report.html --self-contained-html'
+                    pytest -m smoke --html=report.html --self-contained-html
                 '''
             }
         }
