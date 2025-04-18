@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    environment:
+      - TZ=Asia/Kolkata
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  ngrok:
+    image: wernight/ngrok
+    container_name: ngrok
+    depends_on:
+      - jenkins
+    environment:
+      - NGROK_AUTHTOKEN=your_ngrok_auth_token_here
+      - NGROK_REGION=in
+      - NGROK_PORT=jenkins:8080
+    ports:
+      - "4040:4040"  # Optional: access ngrok's dashboard
+    entrypoint: /bin/sh -c "until curl --silent jenkins:8080; do echo 'Waiting for Jenkins...'; sleep 5; done; echo 'Jenkins is up, starting ngrok...'; /bin/ngrok http 8080 & echo 'Ngrok started, waiting for URL...'; until curl --silent http://127.0.0.1:4040/api/tunnels | grep -o 'https://[^']*' > /ngrok_url.txt; do sleep 1; done; cat /ngrok_url.txt; start $(cat /ngrok_url.txt); tail -f /ngrok_url.txt"
+
+volumes:
+  jenkins_home:
