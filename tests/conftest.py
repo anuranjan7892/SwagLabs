@@ -24,26 +24,27 @@ def get_browser_list():
 @pytest.fixture(scope='session', params=get_browser_list())
 def initialize_driver(request):
     browser = request.param
+    browser_name = browser.lower()
     headless = read_master_config_file()['HEADLESS']
 
-    if browser.lower() == 'chrome':
+    if browser_name == 'chrome':
         options = webdriver.ChromeOptions()
         if headless:
-            options = set_headless_browser_options(options, browser)
+            options = set_headless_browser_options(options, browser_name)
         # To disable Chrome's password manager, as it always pops up for Sauce Demo website
         prefs = {"credentials_enable_service": False,
                  "profile.password_manager_enabled": False}
         options.add_experimental_option("prefs", prefs)
         driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
-    elif browser.lower() == 'firefox':
+    elif browser_name == 'firefox':
         options = webdriver.FirefoxOptions()
         if headless:
-            options = set_headless_browser_options(options, browser)
+            options = set_headless_browser_options(options, browser_name)
         driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()), options=options)
-    elif browser.lower() == 'edge':
+    elif browser_name == 'edge':
         options = webdriver.EdgeOptions()
         if headless:
-            options = set_headless_browser_options(options, browser)
+            options = set_headless_browser_options(options, browser_name)
         driver = webdriver.Edge(service=EdgeService(EdgeChromiumDriverManager().install()), options=options)
     else:
         raise ValueError(f"Unsupported browser: {browser}")
@@ -64,13 +65,13 @@ def initialize_driver(request):
     driver.quit()
 
 def set_headless_browser_options(options, browser):
-    if browser.lower == 'chrome':
+    if browser == 'chrome':
         options.add_argument("--headless=new")
         options.add_argument("--disable-gpu")
         options.add_argument("--window-size=1920,1080")
-    elif browser.lower == 'firefox':
+    elif browser == 'firefox':
         options.add_argument("--headless")
-    elif browser.lower == 'edge':
+    elif browser == 'edge':
         options.add_argument("--headless=new")
 
     return options
