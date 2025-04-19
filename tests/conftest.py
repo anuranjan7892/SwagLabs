@@ -67,6 +67,8 @@ def initialize_driver(request):
 def set_headless_browser_options(options, browser):
     if browser == 'chrome':
         options.add_argument("--headless=new")
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
         options.add_argument("--disable-gpu")
         options.add_argument("--window-size=1920,1080")
     elif browser == 'firefox':
