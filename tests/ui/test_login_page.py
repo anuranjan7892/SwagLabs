@@ -7,7 +7,6 @@ from tests.baseTest import BaseTest
 
 class TestLoginPage(BaseTest):
 
-    @pytest.mark.smoke
     def test_login_functionality(self):
         print("User should be able to login successfully")
         login_page = LoginPage(self.driver)
