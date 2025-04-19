@@ -11,22 +11,36 @@ from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 import yaml
 
-@pytest.fixture(scope='session')
-def initialize_driver(browser):
+def read_master_config_file():
+    """This method is designed to read the master_config file attributes"""
+    file_name = path.join(path.dirname(path.dirname(__file__)), 'master_config.yaml')
+    stream = open(file_name, 'r')
+    data = yaml.safe_load(stream)
+    return data
 
-    headless = read_master_comfig_file()['headless']
+def get_browser_list():
+    return read_master_config_file()['BROWSER']
 
-    if browser.lower == 'chrome':
+@pytest.fixture(scope='session', params=get_browser_list())
+def initialize_driver(request):
+    browser = request.param
+    headless = read_master_config_file()['HEADLESS']
+
+    if browser.lower() == 'chrome':
         options = webdriver.ChromeOptions()
         if headless:
             options = set_headless_browser_options(options, browser)
+        # To disable Chrome's password manager, as it always pops up for Sauce Demo website
+        prefs = {"credentials_enable_service": False,
+                 "profile.password_manager_enabled": False}
+        options.add_experimental_option("prefs", prefs)
         driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
-    elif browser.lower == 'firefox':
+    elif browser.lower() == 'firefox':
         options = webdriver.FirefoxOptions()
         if headless:
             options = set_headless_browser_options(options, browser)
         driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()), options=options)
-    elif browser.lower == 'edge':
+    elif browser.lower() == 'edge':
         options = webdriver.EdgeOptions()
         if headless:
             options = set_headless_browser_options(options, browser)
@@ -34,8 +48,16 @@ def initialize_driver(browser):
     else:
         raise ValueError(f"Unsupported browser: {browser}")
 
+    base_url = get_base_url()
+    driver.get(base_url)
+
+    session = request.node
+    for item in session.items:
+        cls = item.getparent(pytest.Class)
+        setattr(cls.obj, "driver", driver)
+
     driver.maximize_window()
-    driver.implicitly_wait(2)
+    driver.implicitly_wait(10)
 
     yield driver
     driver.close()
@@ -53,12 +75,17 @@ def set_headless_browser_options(options, browser):
 
     return options
 
-def read_master_comfig_file():
+def read_config_file():
     """This method is designed to read the master_config file properties"""
-    file_name = path.join(path.dirname(path.dirname(__file__)), 'master_config.yaml')
+    file_name = path.join(path.dirname(path.dirname(__file__)), 'config.yaml')
     stream = open(file_name, 'r')
     data = yaml.safe_load(stream)
     return data
+
+def get_base_url():
+    return read_config_file()['BASE_URL']
+
+
 
 
 
