@@ -1,5 +1,5 @@
 ---
 ENV: "prod"
-BROWSER: ["Chrome", "Firefox", "Edge"]
+BROWSER: ["Chrome"]
 HEADLESS: True
 ...
