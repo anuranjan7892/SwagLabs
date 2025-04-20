@@ -9,9 +9,13 @@ env/
 __pycache__/
 *.py[cod]
 
+# any kind of reports
+allure-report/
+allure-results/
 *.html
 
 *.log
 
+# screenshots
 *.png
 *.jpg

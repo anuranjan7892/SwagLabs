@@ -2,6 +2,7 @@ from datetime import datetime
 import os
 from os import path
 
+import allure
 import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -110,3 +111,7 @@ def pytest_runtest_makereport(item, call):
             # take screenshot
             driver.save_screenshot(file_path)
             print(f"\n[Screenshot saved to {file_path}]")
+
+            # Attach to Allure report
+            with open(file_path, "rb") as file:
+                allure.attach(file.read(), name=file_name, attachment_type=allure.attachment_type.PNG)

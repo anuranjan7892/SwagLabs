@@ -5,7 +5,7 @@ from pageObjects.customSelenium import CustomSelenium
 
 class LandingPage(CustomSelenium):
 
-    APP_LOGO = By.CLASS_NAME, 'app_logo'
+    APP_LOGO = By.CLASS_NAME, 'app_logos'
 
     def __init__(self, driver):
         super().__init__(driver)
