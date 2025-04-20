@@ -1,3 +1,5 @@
+from datetime import datetime
+import os
 from os import path
 
 import pytest
@@ -71,6 +73,7 @@ def set_headless_browser_options(options, browser):
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument("--disable-gpu")
         options.add_argument("--window-size=1920,1080")
+        options.add_argument('--remote-debugging-port=9222')
     elif browser == 'firefox':
         options.add_argument("--headless")
     elif browser == 'edge':
@@ -88,10 +91,22 @@ def read_config_file():
 def get_base_url():
     return read_config_file()['BASE_URL']
 
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    rep = outcome.get_result()
 
+    if rep.when == 'call' and rep.failed:
+        driver = item.funcargs.get('initialize_driver', None)
+        if driver:
+            screenshots_dir = os.path.join(os.getcwd(), 'screenshots')
+            os.makedirs(screenshots_dir, exist_ok=True)
 
+            # create screenshot file name with test name and timestamp
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            file_name = f"{item.name}_{timestamp}.png"
+            file_path = os.path.join(screenshots_dir, file_name)
 
-
-
-
-
+            # take screenshot
+            driver.save_screenshot(file_path)
+            print(f"\n[Screenshot saved to {file_path}]")
