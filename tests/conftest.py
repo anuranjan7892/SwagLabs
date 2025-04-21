@@ -73,8 +73,11 @@ def set_headless_browser_options(options, browser):
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument("--disable-gpu")
+        options.add_argument("--disable-extensions")
+        options.add_argument("--disable-software-rasterizer")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--remote-debugging-port=9222")
         options.add_argument("--window-size=1920,1080")
-        options.add_argument('--remote-debugging-port=9222')
     elif browser == 'firefox':
         options.add_argument("--headless")
     elif browser == 'edge':
