@@ -1,5 +1,11 @@
 pipeline {
     agent any
+
+    tools {
+        // Use the same name you gave in the Allure tool config
+        allure 'Allure CLI'
+    }
+    
     stages {
         stage('Checkout Git') {
             steps {
@@ -53,16 +59,20 @@ pipeline {
     }
     post {
         always {
-            archiveArtifacts artifacts: 'report.html', allowEmptyArchive: true
+            // Generate HTML report
+        sh '''
+            allure generate allure-results --clean -o allure-report
+        '''
 
-            publishHTML(target: [
-                allowMissing: false,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: '.',
-                reportFiles: 'report.html',
-                reportName: 'Pytest Report'
-            ])
+        // Publish Allure in Jenkins UI
+        allure([
+            includeProperties: false,
+            jdk: '',
+            results: [[path: 'allure-results']]
+        ])
+
+        // Archive HTML report as artifact
+        archiveArtifacts artifacts: 'allure-report/**', fingerprint: true
         }
     }
 }
