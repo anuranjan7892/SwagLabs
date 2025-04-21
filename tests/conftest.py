@@ -14,6 +14,10 @@ from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 import yaml
 
+from utilities.logger_utils import get_logger
+
+log = get_logger()
+
 def read_master_config_file():
     """This method is designed to read the master_config file attributes"""
     file_name = path.join(path.dirname(path.dirname(__file__)), 'master_config.yaml')
@@ -118,3 +122,7 @@ def pytest_runtest_makereport(item, call):
             # Attach to Allure report
             with open(file_path, "rb") as file:
                 allure.attach(file.read(), name=file_name, attachment_type=allure.attachment_type.PNG)
+
+@pytest.fixture(scope='session')
+def logger():
+    return log
