@@ -61,6 +61,10 @@ class CustomSelenium:
             log.critical(f"Element is not displayed, locator -> {locator} : Exception -> {e}")
             return False
 
+    def get_element_text(self, locator):
+        el = self.get_web_element(locator)
+        return el.text if el else None
+
     def wait_for_alert(self):
         try:
             WebDriverWait(self.driver, 10).until(ec.alert_is_present())

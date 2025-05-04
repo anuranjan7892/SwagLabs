@@ -1,4 +1,7 @@
+import re
+
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.select import Select
 
 from pageObjects.customSelenium import CustomSelenium
 from tests.conftest import get_logger
@@ -54,3 +57,26 @@ class LandingPage(CustomSelenium):
         for el in els:
             images_list.append(el.get_attribute('src'))
         return images_list
+
+    def click_add_to_cart(self, item_name):
+        by_locator = (By.XPATH, f'//div[div[@class="inventory_item_label"]//div[text()="{item_name}"]]//button[text()="ADD TO CART"]')
+        self.click_element(by_locator)
+        log.info(f"Clicked on add to cart button for item -> {item_name}")
+
+    def get_item_count_in_shopping_cart(self):
+        by_locator = (By.XPATH, "//div[@id='shopping_cart_container']//span[contains(@class, 'shopping_cart_badge')]")
+        return self.get_element_text(by_locator)
+
+    def select_sort_by(self, sort_by_option):
+        sel = Select(self.get_web_element(self.SORT_DROPDOWN))
+        sel.select_by_visible_text(sort_by_option)
+        log.info(f"Selected sort by option -> {sort_by_option}")
+
+    def get_items_price_list(self):
+        by_locator = (By.CLASS_NAME, "inventory_item_price")
+        initial_price_list = self.get_elements_text(by_locator)
+        final_price_list = []
+        for p in initial_price_list:
+            price = re.sub(r'[^\d.]', '', p)
+            final_price_list.append(float(price))
+        return final_price_list

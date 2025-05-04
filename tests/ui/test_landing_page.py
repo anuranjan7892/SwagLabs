@@ -74,11 +74,19 @@ class TestLandingPage(BaseTest):
                 log.critical(f"{item}: Image is not displayed")
             else:
                 log.info(f"{item}: Image is displayed")
-        assert not assert_list, "Some of the product's image are not displayed"
+        assert not assert_list, log.critical("Some of the product's image are not displayed")
 
     @pytest.mark.smoke
     def test_add_item_to_cart(self):
-        print("Item is added to cart successfully")
+        landing_page = LandingPage(self.driver)
+        landing_page.click_add_to_cart('Sauce Labs Backpack')
+
+        assert landing_page.get_item_count_in_shopping_cart() == '1', log.critical("Item is not added to cart")
 
     def test_sorting_functionality(self):
-        print("Sorting functionality is working as expected")
+        landing_page = LandingPage(self.driver)
+        landing_page.select_sort_by("Price (low to high)")
+
+        price_list = landing_page.get_items_price_list()
+
+        assert price_list == sorted(price_list), log.critical("Items are not sorted based on Price correctly")
